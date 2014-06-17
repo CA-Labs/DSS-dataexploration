@@ -79,43 +79,97 @@
         "children": []
       }
 
-      d3.json(cloudProviders.amazon, function(error, data){
+      function create(jsonFile) {
+        d3.json(jsonFile, function(error, data){
 
-        if(error){
-          console.log(error);
-        } else {
-          var data = _.groupBy(data.items, 'tags');
-          _.each(data, function(element, index){
-            var currentTags = element[0].tags;
-            var tagsStringified = _.reduce(currentTags, function(memo, tag) { return memo + tag}, "");
-            insertOrUpdateTagEntry(tagsStringified, element.length)
-          });
-
-          Object.keys(tagsOccurences).forEach(function(key){
-            tags.children.push({"name": key, "size": tagsOccurences[key]})
-          });
-
-          var node = div.datum(tags).selectAll(".node")
-            .data(treemap.nodes)
-            .enter().append("div")
-            .attr("class", "node")
-            .call(position)
-            .style("background", function(d) { return color(d.name); })
-            .text(function(d){ return d.children ? null : d.name; })
-            .on("mouseover", function(d){
-              tooltip.text(d.name + " => " + d.size);
-              return tooltip.style("visibility", "visible");
-            })
-            .on("mousemove", function(){
-              return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
-            })
-            .on("mouseout", function(){
-              return tooltip.style("visibility", "hidden");
+            if(error){
+            console.log(error);
+            } else {
+            var data = _.groupBy(data.items, 'tags');
+            _.each(data, function(element, index){
+                var currentTags = element[0].tags;
+                var tagsStringified = _.reduce(currentTags, function(memo, tag) { return memo + tag}, "");
+                insertOrUpdateTagEntry(tagsStringified, element.length)
             });
 
-        }
+            Object.keys(tagsOccurences).forEach(function(key){
+                tags.children.push({"name": key, "size": tagsOccurences[key]})
+            });
 
-      });
+            var node = div.datum(tags).selectAll(".node")
+                .data(treemap.nodes)
+                .enter().append("div")
+                .attr("class", "node")
+                .call(position)
+                .style("background", function(d) { return color(d.name); })
+                .text(function(d){ return d.children ? null : d.name; })
+                .on("mouseover", function(d){
+                tooltip.text(d.name + " => " + d.size);
+                return tooltip.style("visibility", "visible");
+                })
+                .on("mousemove", function(){
+                return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+                })
+                .on("mouseout", function(){
+                return tooltip.style("visibility", "hidden");
+                });
+
+            }
+        });
+      }
+
+      function update(jsonFile) {
+         d3.json(jsonFile, function(error, data){
+
+            if(error){
+            console.log(error);
+            } else {
+            var data = _.groupBy(data.items, 'tags');
+            _.each(data, function(element, index){
+                var currentTags = element[0].tags;
+                var tagsStringified = _.reduce(currentTags, function(memo, tag) { return memo + tag}, "");
+                insertOrUpdateTagEntry(tagsStringified, element.length)
+            });
+
+            tags.children = [];
+
+            Object.keys(tagsOccurences).forEach(function(key){
+                tags.children.push({"name": key, "size": tagsOccurences[key]})
+            });
+           
+            var node = div.datum(tags).selectAll(".node").data(treemap.nodes);
+
+            node.exit().remove();
+
+            node.enter().append("div")
+                .attr("class", "node")
+                .call(position)
+                .style("background", function(d) { return color(d.name); })
+                .text(function(d){ return d.children ? null : d.name; })
+                .on("mouseover", function(d){
+                  tooltip.text(d.name + " => " + d.size);
+                  return tooltip.style("visibility", "visible");
+                })
+                .on("mousemove", function(){
+                  return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+                })
+                .on("mouseout", function(){
+                  return tooltip.style("visibility", "hidden");
+                });
+
+            node.call(position)
+                .style("background", function(d) { return color(d.name); })
+                .text(function(d){ return d.children ? null : d.name; })
+                .on("mouseover", function(d){
+                  tooltip.text(d.name + " => " + d.size);
+                  return tooltip.style("visibility", "visible");
+                });
+              }
+        });
+      }
+
+
+      create(cloudProviders.amazon);
 
       var position = function() {
         this.style("left", function(d) { return d.x + "px"; })
