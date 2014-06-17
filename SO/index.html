@@ -114,14 +114,16 @@
 
         } else {
 
+          //Clear state
+          tags.children.length = 0;
+          tagsOccurences = {};
+
           var data = _.groupBy(data.items, 'tags');
           _.each(data, function(element, index){
               var currentTags = element[0].tags;
               var tagsStringified = _.reduce(currentTags, function(memo, tag) { return memo + tag}, "");
               insertOrUpdateTagEntry(tagsStringified, element.length)
           });
-
-          tags.children.length = 0;
 
           Object.keys(tagsOccurences).forEach(function(key){
               tags.children.push({"name": key, "size": tagsOccurences[key]})
@@ -151,6 +153,7 @@
 
           //Update elements
           node
+            .text(function(d){ return d.children ? null : d.name; })
             .transition()
             .duration(1500)
             .call(position)
