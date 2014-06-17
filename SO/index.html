@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
   <head>
+
     <script src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
     <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
@@ -20,6 +21,21 @@
         overflow: hidden;
         position: absolute;
         text-indent: 2px;
+      }
+
+      .container {
+        margin: 10px auto;
+      }
+
+      .inline {
+        display: inline-block;
+        margin: 15px;
+      }
+
+      .inline a {
+        color: #000;
+        text-decoration: none;
+        display: block;
       }
 
     </style>
@@ -197,7 +213,72 @@
         "children": []
       }
 
+    loadJson('json/1', drawTreeMap);
     </script>
-
+<div class="container">
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/1', updateTreeMap);">1</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/2', updateTreeMap);">2</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/3', updateTreeMap);">3</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/4', updateTreeMap);">4</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/5', updateTreeMap);">5</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/6', updateTreeMap);">6</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/7', updateTreeMap);">7</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/8', updateTreeMap);">8</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/9', updateTreeMap);">9</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/10', updateTreeMap);">10</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/11', updateTreeMap);">11</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/12', updateTreeMap);">12</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/13', updateTreeMap);">13</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/14', updateTreeMap);">14</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/15', updateTreeMap);">15</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/16', updateTreeMap);">16</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/17', updateTreeMap);">17</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/18', updateTreeMap);">18</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/19', updateTreeMap);">19</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/20', updateTreeMap);">20</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/21', updateTreeMap);">21</a>
+  </div>
+</div>
   </body>
 </html>
