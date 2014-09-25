@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+  <head>
+
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.5.2/underscore-min.js"></script>
+    <style>
+
+      body {
+        font-family: "Helvetica Neue", Helvetiva, Arial, sans-serif;
+        margin: auto;
+        position: relative;
+        width: 1280px;
+      }
+
+      .node {
+        border: solid 1px white;
+        font: 8px, sans-serif;
+        line-height: 10px;
+        overflow: hidden;
+        position: absolute;
+        text-indent: 2px;
+      }
+
+      .container {
+        margin: 10px auto;
+      }
+
+      .inline {
+        display: inline-block;
+        margin: 15px;
+      }
+
+      .inline a {
+        color: #000;
+        text-decoration: none;
+        display: block;
+      }
+
+    </style>
+  </head>
+  <body>
+
+    <script type="text/javascript">
+
+      //This hash will hold the complete list of tag occurences
+      var tagsOccurences = {};
+
+      //Updates the tags occurences hash, if necessary
+      var insertOrUpdateTagEntry = function(tagsString, newValue){
+        tagsString.split(" ").forEach(function(tag){
+          if(tagsOccurences.hasOwnProperty(tag)){
+            //console.log("tag " + tag + " found in hash");
+            tagsOccurences[tag] = tagsOccurences[tag] + 1;
+          } else {
+            //console.log("tag " + tag + " not found, creating it...");
+            tagsOccurences[tag] = newValue;
+          }
+        });
+      };
+
+      //Loads a json file and triggers the callback on error or data received
+      var loadJson = function(json, callback){
+        d3.json(json, function(error, data){
+          if(error){
+            callback(error, null);
+            return;
+          } else {
+            callback(null, data);
+          }
+        })
+      };
+
+      //Node positioning function for treemap nodes
+      var position = function() {
+        this.style("left", function(d) { return d.x + "px"; })
+            .style("top", function(d) { return d.y + "px"; })
+            .style("width", function(d) { return Math.max(0, d.dx - 1) + "px"; })
+            .style("height", function(d) { return Math.max(0, d.dy - 1) + "px"; });
+      }
+
+      var drawTreeMap = function(error, data){
+
+        if(error){
+
+          console.log(error);
+
+        } else {
+
+            var data = _.groupBy(data.items, 'tags');
+            _.each(data, function(element, index){
+                var currentTags = element[0].tags;
+                var tagsStringified = _.reduce(currentTags, function(memo, tag) { return memo + tag}, "");
+                insertOrUpdateTagEntry(tagsStringified, element.length)
+            });
+
+            Object.keys(tagsOccurences).forEach(function(key){
+                tags.children.push({"name": key, "size": tagsOccurences[key]})
+            });
+
+            var node = div.datum(tags).selectAll(".node")
+              .data(treemap.nodes)
+              .enter()
+                .append("div")
+                .attr("class", "node")
+                .call(position)
+                .style("background", function(d) { return color(d.name); })
+                .text(function(d){ return d.children ? null : d.name; })
+                .on("mouseover", function(d){
+                  tooltip.text(d.name + " => " + d.size);
+                  return tooltip.style("visibility", "visible");
+                })
+                .on("mousemove", function(){
+                  return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+                })
+                .on("mouseout", function(){
+                  return tooltip.style("visibility", "hidden");
+                });
+
+        }
+
+      }
+
+      var updateTreeMap = function(error, data) {
+
+        if(error){
+
+          console.log(error);
+
+        } else {
+
+          //Clear state
+          tags.children.length = 0;
+          tagsOccurences = {};
+
+          var data = _.groupBy(data.items, 'tags');
+          _.each(data, function(element, index){
+              var currentTags = element[0].tags;
+              var tagsStringified = _.reduce(currentTags, function(memo, tag) { return memo + tag}, "");
+              insertOrUpdateTagEntry(tagsStringified, element.length)
+          });
+
+          Object.keys(tagsOccurences).forEach(function(key){
+              tags.children.push({"name": key, "size": tagsOccurences[key]})
+          });
+
+          var node = div.datum(tags).selectAll(".node").data(treemap.nodes);
+
+          //Remove old elements
+          node.exit().remove();
+
+          //Create new elements
+          node.enter().append("div")
+            .attr("class", "node")
+            .call(position)
+            .style("background", function(d) { return color(d.name); })
+            .text(function(d){ return d.children ? null : d.name; })
+            .on("mouseover", function(d){
+              tooltip.text(d.name + " => " + d.size);
+              return tooltip.style("visibility", "visible");
+            })
+            .on("mousemove", function(){
+              return tooltip.style("top",(d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");
+            })
+            .on("mouseout", function(){
+              return tooltip.style("visibility", "hidden");
+            });
+
+          //Update elements
+          node
+            .text(function(d){ return d.children ? null : d.name; })
+            .transition()
+            .duration(1500)
+            .call(position)
+
+        }
+
+      }
+
+      var margin = {top: 40, right: 10, bottom: 10, left: 10},
+          width = 1280 - margin.left - margin.right,
+          height = 1024 - margin.top - margin.bottom
+
+      var color = d3.scale.category20c();
+
+      var treemap = d3.layout.treemap()
+        .size([width, height])
+        .sticky(false)
+        .value(function(d) { return d.size; });
+
+      var div = d3.select("body").append("div")
+        .style("position", "relative")
+        .style("width", (width + margin.left + margin.right) + "px")
+        .style("height", (height + margin.top + margin.bottom) + "px")
+        .style("left", margin.left + "px")
+        .style("top", margin.top + "px");
+
+      var tooltip = d3.select("body")
+        .append("div")
+        .style("position", "absolute")
+        .style("background-color", "white")
+        .style("z-index", "10")
+        .style("visibility", "hidden")
+        .text("");
+
+      var cloudProviders = {
+        "amazon": "json/1"
+      }
+
+      var tags = {
+        "name": "amazon",
+        "children": []
+      }
+
+    loadJson('json/1', drawTreeMap);
+    </script>
+<div class="container">
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/1', updateTreeMap);">1</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/2', updateTreeMap);">2</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/3', updateTreeMap);">3</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/4', updateTreeMap);">4</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/5', updateTreeMap);">5</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/6', updateTreeMap);">6</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/7', updateTreeMap);">7</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/8', updateTreeMap);">8</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/9', updateTreeMap);">9</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/10', updateTreeMap);">10</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/11', updateTreeMap);">11</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/12', updateTreeMap);">12</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/13', updateTreeMap);">13</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/14', updateTreeMap);">14</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/15', updateTreeMap);">15</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/16', updateTreeMap);">16</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/17', updateTreeMap);">17</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/18', updateTreeMap);">18</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/19', updateTreeMap);">19</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/20', updateTreeMap);">20</a>
+  </div>
+  <div class="inline">
+    <a href="javascript:void(0);" onclick="loadJson('json/21', updateTreeMap);">21</a>
+  </div>
+</div>
+  </body>
+</html>
